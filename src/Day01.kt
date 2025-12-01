@@ -1,3 +1,4 @@
+import kotlin.math.abs
 
 enum class Direction {
     LEFT, RIGHT
@@ -18,7 +19,7 @@ fun parseRow(line: String): DialInstruction? {
     return DialInstruction(direction, moves)
 }
 
-fun rotate(position: Int, dialInstruction: DialInstruction): Int {
+fun rotate(position: Int, dialInstruction: DialInstruction): Pair<Int, Int> {
     var newPosition = 0
 
     if (dialInstruction.direction == Direction.LEFT) {
@@ -27,11 +28,21 @@ fun rotate(position: Int, dialInstruction: DialInstruction): Int {
         newPosition = position + dialInstruction.amount
     }
 
-    newPosition %= 100
-    if (newPosition < 0)
-        newPosition += 100
+    var clicks = abs(newPosition / 100)
 
-    return newPosition
+    newPosition %= 100
+
+    if (dialInstruction.direction == Direction.LEFT) {
+        if (newPosition < 0) {
+            newPosition += 100
+            if (position != 0)
+                clicks++
+        }
+        else if (newPosition == 0)
+            clicks++
+    }
+
+    return Pair(newPosition, clicks)
 }
 
 fun main() {
@@ -44,24 +55,23 @@ fun main() {
             val row = parseRow(row)
 
             row?.let {
-                intermediatePosition = rotate(intermediatePosition, row)
-                if (intermediatePosition == 0)
-                    numberOfTimesAtZero++
+
+                //print("Start $intermediatePosition")
+
+                val result = rotate(intermediatePosition, row)
+
+                intermediatePosition = result.first
+                val clicks = result.second
+
+                numberOfTimesAtZero += clicks
             }
         }
 
         return numberOfTimesAtZero
     }
 
-    fun part2(input: List<String>): Int {
-        return input.size
-    }
-
     // Read the input from the `src/Day01.txt` file.
     val input = readInput("Day01")
-    println("Task one output:")
+    println("Task output:")
     part1(input).println()
-
-    println("Task two output:")
-    part2(input).println()
 }
