@@ -36,7 +36,7 @@ fun getInvalidIdsFromRange(range: Range): List<Long> {
 }
 
 fun getInvalidIdsFromRangePart2(range: Range): Set<Long> {
-    val listOfInvalidIds = mutableSetOf<Long>()
+    val setOfInvalidIds = mutableSetOf<Long>()
 
     for (i in range.first..range.second) {
         val digitsString = i.toString()
@@ -50,12 +50,12 @@ fun getInvalidIdsFromRangePart2(range: Range): Set<Long> {
                     break
 
                 if (k == numberOfDigits - j)
-                    listOfInvalidIds.add(i)
+                    setOfInvalidIds.add(i)
             }
         }
     }
 
-    return listOfInvalidIds
+    return setOfInvalidIds
 }
 
 fun main() {
@@ -74,14 +74,14 @@ fun main() {
     fun part2(input: String): Long {
         val ranges = loadRanges(input)
 
-        val invalidIdsList = mutableSetOf<Long>()
+        val invalidIdsSet = mutableSetOf<Long>()
 
         ranges.forEach { range ->
-            invalidIdsList.addAll(getInvalidIdsFromRangePart2(range))
+            invalidIdsSet.addAll(getInvalidIdsFromRangePart2(range))
         }
 
         println()
-        return invalidIdsList.sum()
+        return invalidIdsSet.sum()
     }
 
     val testInput = "11-22,95-115,998-1012,1188511880-1188511890,222220-222224," +
