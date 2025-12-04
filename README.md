@@ -1,3 +1,10 @@
+## Disclaimer
+
+No AI/LLM was used to solve this year's Advent Of Code, nor Copilot code completions, just Jetbrains IDEA, 
+Kotlin reference and StackOverflow search. Was part of a challenge with friends.
+
+It was very painful at the beginning, but very rewarding every time I solved the problem alone!
+
 # advent-of-code-2025
 
 Welcome to the Advent of Code[^aoc] Kotlin project created by [jelinekp][github] using the [Advent of Code Kotlin Template][template] delivered by JetBrains.
