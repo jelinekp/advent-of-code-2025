@@ -32,14 +32,14 @@ class RollsWallSolver(
         }
 
     fun getNumberOfAdjacentRolls(lineIndex: Int, columnIndex: Int): Int {
-        var rolls = -1
+        var rolls = -1 // we don't want to count ourselves, so we start from -1
 
         for (i in lineIndex - 1 .. lineIndex + 1) {
             for (j in columnIndex - 1 .. columnIndex + 1) {
                 try {
                     if (rollsWall[i][j] == 1)
                         ++rolls
-                } catch (_: Exception) {
+                } catch (_: Exception) { // index out of bound exception
                     continue
                 }
             }
@@ -90,19 +90,16 @@ fun main() {
     fun part1(input: List<String>): Int {
 
         val solver = RollsWallSolver(input)
-
         solver.readInput()
         // solver.printRollsWall()
-
         return solver.findNumberOfLooseRolls()
     }
 
     fun part2(input: List<String>): Int {
-        val solver = RollsWallSolver(input)
 
+        val solver = RollsWallSolver(input)
         solver.readInput()
         // solver.printRollsWall()
-
         return solver.findNumberOfLooseRollsRepeatedly()
     }
 
