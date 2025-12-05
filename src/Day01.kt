@@ -1,53 +1,49 @@
 import kotlin.math.abs
 
-enum class Direction {
-    LEFT, RIGHT
+enum class Direction(val multiplier: Int) {
+    LEFT(-1), RIGHT(1);
+
+    companion object {
+        fun fromChar(char: Char): Direction? = when (char) {
+            'L' -> LEFT
+            'R' -> RIGHT
+            else -> null
+        }
+    }
 }
 
 data class DialInstruction(val direction: Direction, val amount: Int)
 
 fun parseRow(line: String): DialInstruction? {
-    val direction =
-        if (line[0] == 'L')
-            Direction.LEFT
-        else if (line[0] == 'R')
-            Direction.RIGHT
-        else
-            return null
-    val moves = line.drop(1).toInt()
-
-    return DialInstruction(direction, moves)
+    val direction = Direction.fromChar(line.firstOrNull() ?: return null) ?: return null
+    val amount = line.substring(1).toIntOrNull() ?: return null
+    return DialInstruction(direction, amount)
 }
 
-fun rotate(position: Int, dialInstruction: DialInstruction): Pair<Int, Int> {
-    var newPosition = 0
+fun rotate(currentPosition: Int, instruction: DialInstruction): Pair<Int, Int> {
 
-    if (dialInstruction.direction == Direction.LEFT) {
-        newPosition = position - dialInstruction.amount
-    } else if (dialInstruction.direction == Direction.RIGHT) {
-        newPosition = position + dialInstruction.amount
-    }
+    val rawPosition = currentPosition + (instruction.amount * instruction.direction.multiplier)
 
-    var clicks = abs(newPosition / 100)
+    var clicks = abs(rawPosition / 100)
+    val remainder = rawPosition % 100
 
-    newPosition %= 100
-
-    if (dialInstruction.direction == Direction.LEFT) {
-        if (newPosition < 0) {
-            newPosition += 100
-            if (position != 0)
-                clicks++
-        }
-        else if (newPosition == 0)
+    if (instruction.direction == Direction.LEFT) {
+        // If we wrapped into negatives or landed exactly on 0
+        if (remainder < 0 && currentPosition != 0) {
             clicks++
+        } else if (remainder == 0) {
+            clicks++
+        }
     }
 
-    return Pair(newPosition, clicks)
+    val finalPosition = rawPosition.mod(100)
+
+    return finalPosition to clicks
 }
 
 fun main() {
     // is now solving part2 - I have rewritten part1 instead of adding part2
-    fun part1(input: List<String>): Int {
+    fun part2(input: List<String>): Int {
 
         var intermediatePosition = 50
         var numberOfTimesAtZero = 0
@@ -74,5 +70,5 @@ fun main() {
     // Read the input from the `src/Day01.txt` file.
     val input = readInput("Day01")
     println("Task output:")
-    part1(input).println()
+    part2(input).println()
 }
