@@ -1,14 +1,11 @@
-import kotlin.collections.partition
+import kotlin.math.max
 
 class Solver(
     val input: List<String>
 ) {
-    private var ranges: MutableMap<Long, Long> = mutableMapOf()
+    private var ranges: MutableList<Pair<Long, Long>> = mutableListOf()
 
     private var values: MutableList<Long> = mutableListOf()
-
-    private var height: Int = 0
-    private var width: Int = 0
 
     fun readInput() {
         val inputLength = input.size
@@ -24,21 +21,16 @@ class Solver(
                 val parts = input[i].split('-')
                 val first = parts.first()
                 val second = parts[1]
-                ranges[first.toLong()] = second.toLong()
+                ranges.add(first.toLong() to second.toLong())
             } else {
                 values.add(input[i].toLong())
             }
         }
     }
 
-    fun printParsedInput() {
-        println(ranges)
-        println(values)
-    }
-
     private fun isValueInAnyOfTheRanges(value: Long): Boolean {
         ranges.forEach { pair ->
-            if (value >= pair.key && value <= pair.value)
+            if (value >= pair.first && value <= pair.second)
                 return true
         }
         return false
@@ -54,72 +46,33 @@ class Solver(
         return validIds
     }
 
-    fun getAllValidIds(): Int {
-        val setOfAllValidIds = mutableSetOf<Long>()
+    private fun cleanRanges(): List<Pair<Long, Long>> {
+        ranges.sortWith(Comparator { itemA, itemB ->
+            itemA.first.compareTo(itemB.first)
+        })
 
-        ranges.forEach { range ->
-            for (i in range.key..range.value)
-                setOfAllValidIds.add(i)
-        }
+        val mergedRanges = mutableListOf<Pair<Long, Long>>()
+        mergedRanges.add(ranges.first())
 
-        return setOfAllValidIds.size
-    }
+        ranges.forEach { currentRange ->
+            val last = mergedRanges[mergedRanges.size - 1]
 
-    fun mergeRanges(ranges: Map<Long, Long>): Map<Long, Long> {
-        if (ranges.isEmpty())
-            return emptyMap()
-
-        val sortedMap = ranges.toSortedMap()
-        val mapOfEntriesToRemove: MutableMap<Long, Boolean> = sortedMap.keys.associateWith { false }.toMutableMap()
-
-        sortedMap.forEach { originalRange ->
-
-            val originalLowerBound = originalRange.key
-
-            if (!(mapOfEntriesToRemove[originalLowerBound] ?: false)) {
-                val originalUpperBound = originalRange.value
-
-                sortedMap
-                    .filterKeys {
-                        it >= originalLowerBound && !(mapOfEntriesToRemove[it] ?: false)
-                    }
-                    .forEach { range ->
-
-                        val otherLowerBound = range.key
-                        val otherUpperBound = range.value
-
-                        if (otherLowerBound <= originalUpperBound) {
-                            if (otherUpperBound <= originalUpperBound) {
-                                // completely stash the other map
-                                mapOfEntriesToRemove[range.key] = true
-                            } else {
-                                // set a new upper bound to the original map and stash the other map
-                                sortedMap[originalLowerBound] = otherUpperBound
-                                mapOfEntriesToRemove[originalLowerBound] = false
-                                mapOfEntriesToRemove[otherLowerBound] = true
-                            }
-                        }
-                    }
+            if (currentRange.first <= last.second) {
+                mergedRanges[mergedRanges.size - 1] = last.copy(second = max(last.second, currentRange.second))
+            } else {
+                mergedRanges.add(currentRange)
             }
         }
 
-        // println(mapOfEntriesToRemove)
-
-        val cleanMap = sortedMap.filter { range ->
-            !mapOfEntriesToRemove[range.key]!!
-        }
-
-        return cleanMap
+        return mergedRanges
     }
 
-    fun cleanRanges
-
     fun countDistinctValidIds(): Long {
-        val mergedRanges = mergeRanges(ranges)
+        val mergedRanges = cleanRanges()
         var sum = 0L
 
         mergedRanges.forEach {
-            sum += (it.value - it.key)
+            sum += (it.second - it.first + 1)
         }
 
         return sum
@@ -129,7 +82,7 @@ class Solver(
         println("--Original ranges--")
         println(ranges)
         println("--New ranges--")
-        println(mergeRanges(ranges))
+        println(cleanRanges())
     }
 
 }
@@ -139,7 +92,7 @@ fun main() {
 
         val solver = Solver(input)
         solver.readInput()
-        // solver.printParsedInput()
+
         return solver.doTheBruteForce()
     }
 
@@ -147,24 +100,26 @@ fun main() {
 
         val solver = Solver(input)
         solver.readInput()
-        // solver.printParsedInput()
+
         solver.printMergedRanges()
-        //return solver.getAllValidIds()
+
         return solver.countDistinctValidIds()
     }
 
+    println("Part 1:")
     part1(readInput("test05")).println()
-    //part2(readInput("test05")).println()
 
-    // Test if implementation meets criteria from the description, like:
+    // Test if implementation meets criteria from the description:
     check(part1(readInput("test05")) == 3)
 
     // Read the input from the `src/Day01.txt` file.
-    println("Part 1:")
+
     val input = readInput("Day05")
     part1(input).println()
 
-    // check(part2(readInput("test05")) == 14)
     println("Part 2:")
+
+    check(part2(readInput("test05")) == 14L)
+    part2(readInput("test05")).println()
     part2(input).println()
 }
