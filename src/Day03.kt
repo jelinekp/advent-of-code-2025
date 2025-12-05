@@ -1,74 +1,45 @@
+fun String.findMaxSubsequence(length: Int): Long {
+    val sb = StringBuilder()
+    var searchIndex = 0
+    val n = this.length
 
-fun findHighestJoltage(bank: String): Int {
-    val lastIndex = bank.length - 1
-    val joltageArray = bank.toCharArray()
+    // We need to fill k slots
+    for (itemsNeeded in length downTo 1) {
+        // We can only search up to the point where we leave enough items for the subsequent iterations
+        // e.g. if we need 2 more items, we can't pick the very last item now
+        val searchLimit = n - itemsNeeded
 
-    val maxIdx = joltageArray.indices.maxBy { joltageArray[it] }
+        var maxDigit = '0' - 1
+        var maxIdx = -1
 
-    var newJoltageArray: List<Char> = joltageArray.toList()
-    var result = 0
+        // Scan the valid window for the largest digit
+        for (i in searchIndex..searchLimit) {
+            val current = this[i]
+            if (current > maxDigit) {
+                maxDigit = current
+                maxIdx = i
+                // If we found 9, we can't go higher
+                if (maxDigit == '9') break
+            }
+        }
 
-    if (maxIdx == lastIndex) {
-        newJoltageArray = newJoltageArray.dropLast(1)
-        // the first max value will be the second
-        val secondHighestValue = newJoltageArray.max()
-        result = String(charArrayOf(secondHighestValue, joltageArray[maxIdx])).toInt()
-    } else {
-        newJoltageArray = newJoltageArray.drop(maxIdx + 1)
-        // the first max value stays first
-        val secondHighestValue = newJoltageArray.max()
-        result = String(charArrayOf(joltageArray[maxIdx], secondHighestValue)).toInt()
+        sb.append(maxDigit)
+        searchIndex = maxIdx + 1
     }
 
-    return result
-}
-
-// get the first highest number with i numbers remaining, simple, right?
-fun findHighestJoltageTwelve(bank: String): Long {
-    val n = bank.length
-    var lastFoundIndex = 0
-    var resultString = ""
-
-    for (i in 12 downTo 1) {
-        val boundedString = bank.substring(lastFoundIndex, n - i + 1)
-
-        val boundedJoltageArray = boundedString.toCharArray()
-
-        // find the first max number index in the bounded string
-        val maxIdx = boundedJoltageArray.indices.maxBy { boundedJoltageArray[it] }
-
-        lastFoundIndex += (maxIdx + 1)
-        resultString += boundedJoltageArray[maxIdx]
-    }
-
-    return resultString.toLong()
+    return sb.toString().toLong()
 }
 
 fun main() {
-    fun part1(input: List<String>): Int {
-        var sum = 0
-
-        input.forEach { bank ->
-            sum += findHighestJoltage(bank)
-        }
-        return sum
+    fun part1(input: List<String>): Long {
+        return input.sumOf { it.findMaxSubsequence(2) }
     }
 
     fun part2(input: List<String>): Long {
-        var sum = 0L
-
-        input.forEach { bank ->
-            sum += findHighestJoltageTwelve(bank)
-        }
-        return sum
+        return input.sumOf { it.findMaxSubsequence(12) }
     }
 
-    // Test if implementation meets criteria from the description, like:
-    //part1(readInput("test03")).println()
-    part2(readInput("test03")).println()
-
-    // Read the input from the `src/Day01.txt` file.
     val input = readInput("Day03")
-    part1(input).println()
-    part2(input).println()
+    println("Part 1: ${part1(input)}")
+    println("Part 2: ${part2(input)}")
 }
