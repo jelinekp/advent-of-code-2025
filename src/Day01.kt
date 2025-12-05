@@ -46,6 +46,7 @@ fun rotate(position: Int, dialInstruction: DialInstruction): Pair<Int, Int> {
 }
 
 fun main() {
+    // is now solving part2 - I have rewritten part1 instead of adding part2
     fun part1(input: List<String>): Int {
 
         var intermediatePosition = 50

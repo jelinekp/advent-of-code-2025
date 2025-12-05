@@ -32,13 +32,13 @@ fun findHighestJoltageTwelve(bank: String): Long {
     for (i in 12 downTo 1) {
         val boundedString = bank.substring(lastFoundIndex, n - i + 1)
 
-        val joltageArray = boundedString.toCharArray()
+        val boundedJoltageArray = boundedString.toCharArray()
 
-        // find the first max number in the bounded string
-        val maxIdx = joltageArray.indices.maxBy { joltageArray[it] }
+        // find the first max number index in the bounded string
+        val maxIdx = boundedJoltageArray.indices.maxBy { boundedJoltageArray[it] }
 
         lastFoundIndex += (maxIdx + 1)
-        resultString += joltageArray[maxIdx]
+        resultString += boundedJoltageArray[maxIdx]
     }
 
     return resultString.toLong()
