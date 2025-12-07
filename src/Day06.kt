@@ -27,33 +27,29 @@ class MathHomeworkSolver(
     private var operations: List<Operation> = emptyList()
 
     fun readInput() {
-        val inputLength = input.size
-
         // get a list of positions of first characters
-
-        val lastLine = input[inputLength - 1]
         val listOfFirstPositions = mutableListOf<Int>()
 
-        lastLine.toCharArray().forEachIndexed { index, ch ->
+        val operationsLine = input.last()
+        operationsLine.toCharArray().forEachIndexed { index, ch ->
             if (!ch.isWhitespace())
                 listOfFirstPositions.add(index)
         }
 
         println("listOfFirstPositions: $listOfFirstPositions")
 
-        operations = lastLine.trim().split("\\s+".toRegex()).map { it.toOperation() }
+        operations = operationsLine.trim().split("\\s+".toRegex()).map { it.toOperation() }
 
         numberColumns = MutableList(operations.size) { mutableListOf() }
 
-        for (i in 0..<inputLength - 1) {
-            val line = input[i]
+        val numberLines = input.dropLast(1)
 
+        numberLines.forEach { line ->
             // we need the split with leading whitespaces
-
             val lineStringList = mutableListOf<String>()
 
-            listOfFirstPositions.forEachIndexed { i, firstIndex ->
-                val lastIndex = if (i < listOfFirstPositions.lastIndex) listOfFirstPositions[i + 1] else line.length
+            listOfFirstPositions.forEachIndexed { index, firstIndex ->
+                val lastIndex = if (index < listOfFirstPositions.lastIndex) listOfFirstPositions[index + 1] else line.length
 
                 val sb = StringBuilder()
 
@@ -70,15 +66,10 @@ class MathHomeworkSolver(
     }
 
     private fun solveOne(operation: Operation, numbers: List<String>): Long {
-
         if (operation == Operation.ADDITION)
             return numbers.sumOf { string -> string.filterNot { it == '-' }.trim().toLong() }
         else if (operation == Operation.MULTIPLICATION) {
-            var result = 1L
-            numbers.forEach { string ->
-                result *= string.filterNot { it == '-' }.trim().toLong()
-            }
-            return result
+            return numbers.fold(1L) { acc, num -> acc * num.filterNot { it == '-' }.trim().toLong() }
         }
         return 0L
     }
