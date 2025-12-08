@@ -43,31 +43,32 @@ data class Edge(
     }
 }
 
-class DisjointSet<T> {
-    val graphs = mutableMapOf<T, Int>()
+class DisjointSet(val numberOfVertices: Int) {
+    val graphs = mutableMapOf<Vertex, Int>()
     private var maxGraphId = 0
 
-    fun getGraphId(p: T): Int {
+    fun getGraphId(p: Vertex): Int {
         return graphs[p] ?: 0
     }
 
-    fun findAllVerticesForGraph(graphId: Int): Set<T> {
+    fun findAllVerticesForGraph(graphId: Int): Set<Vertex> {
         return graphs.filterValues { it == graphId }.keys
     }
 
-    fun mergeGraphs(id1: Int, id2: Int) {
+    fun mergeGraphs(id1: Int, id2: Int): Int {
         val vertices1 = findAllVerticesForGraph(id1)
         val vertices2 = findAllVerticesForGraph(id2)
 
+        val combinedGraph = vertices1 + vertices2
         ++maxGraphId
 
-        (vertices1 + vertices2).forEach { vertex ->
+        combinedGraph.forEach { vertex ->
             graphs[vertex] = maxGraphId
         }
-
+        return maxGraphId
     }
 
-    fun union(p: T, q: T) {
+    fun union(p: Vertex, q: Vertex): Long {
         val graphIdP = getGraphId(p)
         val graphIdQ = getGraphId(q)
 
@@ -77,22 +78,26 @@ class DisjointSet<T> {
                 graphs[p] = maxGraphId
                 graphs[q] = maxGraphId
             }
-            return
+            return 0L
         }
 
-        if (graphIdP == 0)
+        var newGraphId = 0
+
+        if (graphIdP == 0) {
             graphs[p] = graphIdQ
-        else if (graphIdQ == 0)
+            newGraphId = graphIdQ
+        }
+        else if (graphIdQ == 0) {
             graphs[q] = graphIdP
+            newGraphId = graphIdP
+        }
         else
-            mergeGraphs(graphIdP, graphIdQ)
+            newGraphId = mergeGraphs(graphIdP, graphIdQ)
 
-
-
-
-        // find all vertices from given graph and look for connections
-
-
+        if (findAllVerticesForGraph(newGraphId).size == numberOfVertices) {
+            return (p.first * q.first).toLong()
+        }
+        return 0L
     }
 }
 
@@ -100,8 +105,8 @@ val edgeComparator = Comparator<Edge> { x, y -> (x.euclideanDistance - y.euclide
 
 class MinGraphSolver(
     val input: List<String>,
-    val numberOfEdgesConnected: Int,
-    val topResults: Int,
+/*    val numberOfEdgesConnected: Int,
+    val topResults: Int,*/
 ) {
 
     private val numberOfLines = input.size
@@ -144,63 +149,46 @@ class MinGraphSolver(
     private fun getEuclideanDistance(a: Vertex, b: Vertex) =
         sqrt((a.first - b.first) * (a.first - b.first) + (a.second - b.second) * (a.second - b.second) + (a.third - b.third) * (a.third - b.third))
 
-    fun minSpanningTree(): Int {
-        val disjointSet = DisjointSet<Vertex>()
+    fun minSpanningTree(): Long {
+        val disjointSet = DisjointSet(numberOfLines)
 
-        repeat (numberOfEdgesConnected) {
+        while (true) {
             val edge = edgeMinHeap.poll()
             val src = edge.firstVertex
             val dest = edge.secondVertex
 
-            disjointSet.union(src, dest)
+            val unionResult = disjointSet.union(src, dest)
+            if (unionResult > 0)
+                return unionResult
         }
-
-        println("-----------------SPANNING TREE-----------------")
-        println("-----------------GRAPHS-----------------")
-
-        val mapOfResults = mutableMapOf<Int, Int>()
-        disjointSet.graphs.values.map {
-            mapOfResults[it] = mapOfResults.getOrDefault(it, 0) + 1
-        }
-
-        val result = mapOfResults.values.sortedDescending()
-
-        var numberToFind = result[0]
-        for (i in 1..<topResults) {
-            numberToFind *= result[i]
-        }
-
-        println(mapOfResults)
-
-        println(numberToFind)
-        println("----------------END------------------")
-
-        return numberToFind
     }
 
 }
 
 fun main() {
     fun part1(input: List<String>, number: Int, topResults: Int): Int {
-        val solver = MinGraphSolver(input, number, topResults)
-        return solver.minSpanningTree()
+        /*val solver = MinGraphSolver(input, number, topResults)
+        return solver.minSpanningTree()*/
+        return 0
     }
 
     fun part2(input: List<String>): Long {
-        val solver = MinGraphSolver(input, 0, 0)
-        return 0L
+        val solver = MinGraphSolver(input)
+        return solver.minSpanningTree()
     }
+/*
 
     println("Part 1:")
     part1(readInput("test08"), 10, 3).println()
     check(part1(readInput("test08"), 10, 3) == 40)
 
-    val input = readInput("Day08")
-    part1(input, 1000, 3).println()
 
+    part1(input, 1000, 3).println()
+*/
+    val input = readInput("Day08")
     println("Part 2:")
 
     part2(readInput("test08")).println()
-    check(part2(readInput("test08")) == 40L)
+    check(part2(readInput("test08")) == 25272L)
     part2(input).println()
 }
